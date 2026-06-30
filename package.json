@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "node --import ts-node/register test/test-supervisor.ts",
+    "test": "node --require ts-node/register test/test-supervisor.ts",
     "test:router": "node test/test-routing.ts"
   },
   "keywords": [
