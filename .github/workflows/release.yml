@@ -4,11 +4,11 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'           # Tag pattern: v1.0.0, v2.3.4, etc.
-  workflow_dispatch:        # Manual run button
+       - 'v*'            # Tag pattern: v1.0.0, v2.3.4, etc.
+  workflow_dispatch:         # Manual run button
 
 permissions:
-  contents: write          # Needed for creating a release
+  contents: write           # Needed for creating a release
 
 concurrency:
   group: release
@@ -18,61 +18,62 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Checkout source code
-      - name: Checkout
-        uses: actions/checkout@v5
+       # 1️⃣ Checkout source code
+       - name: Checkout
+         uses: actions/checkout@v5
 
-      # 2️⃣ Install Node & cache npm packages
-      - name: Setup Node
-        uses: actions/setup-node@v5
-        with:
-          node-version: 24            # Use Node 24 (the newest LTS)
-          registry-url: https://registry.npmjs.org
-          cache: npm
+       # 2️⃣ Install Node & cache npm packages
+       - name: Setup Node
+         uses: actions/setup-node@v5
+         with:
+           node-version: 24             # Use Node 24 (the newest LTS)
+           registry-url: https://registry.npmjs.org
+           cache: npm
 
-      # 3️⃣ Install dependencies (respect package-lock.json)
-      - name: Install Dependencies
-        run: npm ci
+       # 3️⃣ Install dependencies (respect package-lock.json)
+       - name: Install Dependencies
+         run: npm ci
 
-      # 4️⃣ Verify TypeScript config (strict check, no emit)
-      - name: Typecheck
-        run: npm run typecheck
+       # 4️⃣ Verify TypeScript config (strict check, no emit)
+       - name: Typecheck
+         run: npm run typecheck
 
-      # 5️⃣ Run unit tests
-      - name: Run Tests
-        run: npm test
+       # 5️⃣ Run unit tests
+       - name: Run Tests
+         run: npm test
 
-      # 6️⃣ Compile the project to JS
-      - name: Build
-        run: npm run build
+       # 6️⃣ Compile the project to JS
+       - name: Build
+         run: npm run build
 
-      # 7️⃣ Dry‑run the npm pack to ensure the package is valid
-      - name: Validate Package
-        run: npm pack --dry-run
+       # 7️⃣ Dry-run the npm pack to ensure the package is valid
+       - name: Validate Package
+         run: npm pack --dry-run
 
-      # 8️⃣ (Optional) Verify the npm auth token by logging into npm
-      #    This will fail if `${{ secrets.NPM_TOKEN }}` is missing or wrong.
-      - name: Check npm Auth
-        run: npm whoami
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+       # 8️⃣ Verify the npm auth token by logging into npm
+       - name: Check npm Auth
+         run: npm whoami
+         env:
+           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # 9️⃣ Get the package version from package.json and export as env var
-      - name: Get Version
-        run: echo "VERSION=$(node -p \"require('./package.json').version\")" >> $GITHUB_ENV
+       # 9️⃣ Get the package version from package.json and export as env var
+       - name: Get Version
+         run: |
+           V=$(node -p "require('./package.json').version")
+           echo "VERSION=$V" >> $GITHUB_ENV
 
-      # 🔟 Publish the package to npmjs.org
-      - name: Publish to npm
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+       # 🔟 Publish the package to npmjs.org
+       - name: Publish to npm
+         run: npm publish --access public
+         env:
+           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # ✨ Create a GitHub Release for the tag that triggered this workflow
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create \"${GITHUB_REF_NAME}\" \
-            --title \"${GITHUB_REF_NAME}\" \
-            --generate-notes
+       # ✨ Create a GitHub Release for the tag that triggered this workflow
+       - name: Create GitHub Release
+         if: startsWith(github.ref, 'refs/tags/')
+         env:
+           GH_TOKEN: ${{ github.token }}
+         run: |
+           gh release create "$GITHUB_REF_NAME" \
+              --title "$GITHUB_REF_NAME" \
+              --generate-notes
