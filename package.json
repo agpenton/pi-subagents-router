@@ -1,6 +1,6 @@
 {
   "name": "pi-subagents-router",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Pi extension that routes agents based on task descriptions using useWhen and avoidWhen criteria",
   "type": "module",
   "main": "./dist/agent-router.js",
